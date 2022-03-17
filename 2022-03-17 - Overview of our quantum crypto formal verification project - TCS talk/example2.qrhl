@@ -1,0 +1,44 @@
+isabelle.
+
+isabelle_cmd declare_variable_type domain :: "{finite,xor_group}".
+isabelle_cmd axiomatization f :: "domain ⇒ domain" where f_bij: "bij f".
+
+classical var x : domain.
+classical var z : domain.
+classical var y : domain.
+classical var z' : domain.
+ambient var rho : program_state.
+
+quantum var stateB : infinite.
+
+adversary B free y, z', stateB.
+
+program p1 := {
+  x <$ uniform (UNIV::domain set);
+  z <- f x;
+  y <- f z;
+  call B;
+}.
+
+program p2 := {
+  z <$ uniform (UNIV::domain set);
+  y <- f z;
+  call B;
+}.
+
+lemma test: Pr[z=z' : p1(rho)] = Pr[z=z' : p2(rho)].
+
+byqrhl.
+inline p1.
+inline p2.
+equal.
+ simp!.
+simp.
+wp 2 1.
+rnd x,z <- map_distr (λx. (x, f x)) (uniform UNIV).
+simp.
+simp f_bij.
+skip.
+simp.
+
+qed.
